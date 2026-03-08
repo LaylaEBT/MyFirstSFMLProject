@@ -1,6 +1,4 @@
 ﻿
-This repository is my first SMFL project using the SFML project Template.
-The purpose of this project is to make a game out of it, but mainly to learn!
 # Wire Untangle — SFML Learning Project
 
 A 2D puzzle game built with **C++** and **SFML 3**, where the player must untangle a set of crossed wires by repositioning their endpoints on a grid.
