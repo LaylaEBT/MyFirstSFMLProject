@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <slot.h>
+#include <connection.h>
 
 void drawcircle(sf::RenderWindow & window, float position_x, float position_y, sf::Color color)
 {
@@ -15,35 +17,9 @@ void drawcircle(sf::RenderWindow & window, float position_x, float position_y, s
 
 }
 
-class Slot {
-public:
 
-    bool isSelected = false;
 
-    void setPosition(sf::Vector2f pos)
-    {
-        m_position = pos;
-    }
-
-    sf::Vector2f getPosition() const 
-    {
-        return m_position;
-    }
-    void draw(sf::RenderWindow & window) 
-    {
-
-        sf::CircleShape shape(10.f);
-        shape.setFillColor(isSelected ? sf::Color::Blue : sf::Color::Green);
-        shape.setPosition(m_position);
-        window.draw(shape);
-
-    }
-private:
-    sf::Vector2f m_position;
-
-};
-
-class Connection
+/*class Connection
 {
 public:
     Connection(sf::Vector2f start, sf::Vector2f end)
@@ -102,7 +78,7 @@ private:
     sf::Vector2f m_start;
     sf::Vector2f m_end;
 
-};
+};*/
 
 void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
     std::vector<Connection>& connections, int& selectedConnectionIndex,
