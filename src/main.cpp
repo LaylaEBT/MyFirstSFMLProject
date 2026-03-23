@@ -193,26 +193,6 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol,
 }
 
 
-/*void drawConnection(sf::RenderWindow & window, sf::CircleShape & circleA, sf::CircleShape & circleB, float thickness)
-{
-    sf::Vector2f start = circleA.getPosition();
-    sf::Vector2f end = circleB.getPosition();
-
-    sf::Vector2f delta = end - start;
-
-    float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-
-    float angle = std::atan2(delta.y, delta.x) * 180.f / 3.14159265f;
-
-    sf::RectangleShape line({ length, thickness });
-    line.setPosition(start);
-    line.setRotation(sf::degrees(angle));
-    line.setFillColor(sf::Color::Yellow);
-
-    window.draw(line);
-}*/
-
-
 
 int main()
 {
