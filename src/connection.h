@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#pragma once
+
+enum class DragMode { None, DraggingEnd, DraggingStart };
 
 class Connection
 {

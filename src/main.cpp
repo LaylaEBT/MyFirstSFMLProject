@@ -19,70 +19,9 @@ void drawcircle(sf::RenderWindow & window, float position_x, float position_y, s
 
 
 
-/*class Connection
-{
-public:
-    Connection(sf::Vector2f start, sf::Vector2f end)
-        : m_start(start), m_end(end)
-    {}
-
-    sf::Vector2f getStart() const
-    {
-        return m_start;
-    }
-
-    sf::Vector2f getEnd() const
-    {
-        return m_end;
-    }
-
-    void setEnd(sf::Vector2f end) 
-    { 
-        m_end = end; 
-    }
-
-    void setStart(sf::Vector2f start) 
-    { 
-        m_start = start; 
-    }
-
-    bool isSelected = false;
-
-    void draw(sf::RenderWindow& window, float thickness = 20.f)
-    {
-        sf::Color color = isSelected ? sf::Color::Red : sf::Color::Yellow;
-
-
-        sf::Vector2f delta = m_end - m_start;
-        float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-
-        
-        sf::Vector2f perp(-delta.y / length, delta.x / length);
-        sf::Vector2f offset = perp * (thickness / 2.f);
-
-        sf::VertexArray line(sf::PrimitiveType::TriangleStrip, 4);
-        line[0].position = m_start + offset;
-        line[1].position = m_start - offset;
-        line[2].position = m_end + offset;
-        line[3].position = m_end - offset;
-
-        for (int i = 0; i < 4; ++i)
-            line[i].color = color;
-
-        window.draw(line);
-    }
-
-
-private:
-
-    sf::Vector2f m_start;
-    sf::Vector2f m_end;
-
-};*/
-
 void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
     std::vector<Connection>& connections, int& selectedConnectionIndex,
-    bool& movingEnd, int rows, int cols)
+    DragMode& dragMode, int rows, int cols)
 {
     if (!event.is<sf::Event::KeyPressed>())
         return;
@@ -119,25 +58,33 @@ void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
             selectedRow * 25.f + 10.f
         };
 
-        if (!movingEnd)
+        if (dragMode == DragMode::None)
         {
-            for (int i = 0; i < connections.size(); ++i)
+            for (int i = 0; i < (int)connections.size(); ++i)
             {
-                if (connections[i].getEnd() == currentSlotCenter ||
-                    connections[i].getStart() == currentSlotCenter)
+                if (connections[i].getEnd() == currentSlotCenter)
                 {
                     selectedConnectionIndex = i;
-                    movingEnd = true;
+                    dragMode = DragMode::DraggingEnd;
+                    break;
+                }
+                else if (connections[i].getStart() == currentSlotCenter)
+                {
+                    selectedConnectionIndex = i;
+                    dragMode = DragMode::DraggingStart;
                     break;
                 }
             }
         }
         else
         {
-            connections[selectedConnectionIndex].setEnd(currentSlotCenter);
-            selectedConnectionIndex = -1;
-            movingEnd = false;
+            if (dragMode == DragMode::DraggingEnd)
+                connections[selectedConnectionIndex].setEnd(currentSlotCenter);
+            else if (dragMode == DragMode::DraggingStart)
+                connections[selectedConnectionIndex].setStart(currentSlotCenter);
 
+            selectedConnectionIndex = -1;
+            dragMode = DragMode::None;
         }
         break;
     }
@@ -146,18 +93,107 @@ void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
         break;
     }
 
-    if (movingEnd && selectedConnectionIndex != -1)
+    if (dragMode != DragMode::None && selectedConnectionIndex != -1)
     {
-        sf::Vector2f newEnd = {
+        sf::Vector2f newPos = {
             selectedCol * 25.f + 10.f,
             selectedRow * 25.f + 10.f
         };
-        connections[selectedConnectionIndex].setEnd(newEnd);
+
+        if (dragMode == DragMode::DraggingEnd)
+            connections[selectedConnectionIndex].setEnd(newPos);
+        else if (dragMode == DragMode::DraggingStart)
+            connections[selectedConnectionIndex].setStart(newPos);
+    }
+}
+
+float distance(sf::Vector2f a, sf::Vector2f b)
+{
+    sf::Vector2f delta = b - a;
+    return std::sqrt(delta.x * delta.x + delta.y * delta.y);
+}
+
+void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol,
+    std::vector<Connection>& connections, int& selectedConnectionIndex,
+    DragMode& dragMode, int rows, int cols, float spacing)
+{
+    if (event.is<sf::Event::MouseButtonPressed>())
+    {
+        auto* mouse = event.getIf<sf::Event::MouseButtonPressed>();
+        if (mouse->button != sf::Mouse::Button::Left)
+            return;
+
+        sf::Vector2f clickPos = {
+            (float)mouse->position.x,
+            (float)mouse->position.y
+        };
+
+        if (dragMode == DragMode::None)
+        {
+
+            for (int i = 0; i < (int)connections.size(); ++i)
+            {
+                if (distance(clickPos, connections[i].getEnd()) < 15.f)
+                {
+                    selectedConnectionIndex = i;
+                    dragMode = DragMode::DraggingEnd;
+                    return;
+                }
+                else if (distance(clickPos, connections[i].getStart()) < 15.f)
+                {
+                    selectedConnectionIndex = i;
+                    dragMode = DragMode::DraggingStart;
+                    return;
+                }
+            }
+
+            int col = (int)(clickPos.x / spacing);
+            int row = (int)(clickPos.y / spacing);
+            selectedCol = std::clamp(col, 0, cols - 1);
+            selectedRow = std::clamp(row, 0, rows - 1);
+        }
+        else
+        {
+            int col = (int)(clickPos.x / spacing);
+            int row = (int)(clickPos.y / spacing);
+            col = std::clamp(col, 0, cols - 1);
+            row = std::clamp(row, 0, rows - 1);
+
+            sf::Vector2f snappedPos = {
+                col * spacing + 10.f,
+                row * spacing + 10.f
+            };
+
+            if (dragMode == DragMode::DraggingEnd)
+                connections[selectedConnectionIndex].setEnd(snappedPos);
+            else if (dragMode == DragMode::DraggingStart)
+                connections[selectedConnectionIndex].setStart(snappedPos);
+
+            selectedConnectionIndex = -1;
+            dragMode = DragMode::None;
+        }
+    }
+
+    if (event.is<sf::Event::MouseMoved>())
+    {
+        if (dragMode == DragMode::None || selectedConnectionIndex == -1)
+            return;
+
+        auto* mouse = event.getIf<sf::Event::MouseMoved>();
+        sf::Vector2f mousePos = {
+            (float)mouse->position.x,
+            (float)mouse->position.y
+        };
+
+        if (dragMode == DragMode::DraggingEnd)
+            connections[selectedConnectionIndex].setEnd(mousePos);
+        else if (dragMode == DragMode::DraggingStart)
+            connections[selectedConnectionIndex].setStart(mousePos);
     }
 }
 
 
-void drawConnection(sf::RenderWindow& window, sf::CircleShape& circleA, sf::CircleShape& circleB, float thickness)
+/*void drawConnection(sf::RenderWindow & window, sf::CircleShape & circleA, sf::CircleShape & circleB, float thickness)
 {
     sf::Vector2f start = circleA.getPosition();
     sf::Vector2f end = circleB.getPosition();
@@ -174,7 +210,7 @@ void drawConnection(sf::RenderWindow& window, sf::CircleShape& circleA, sf::Circ
     line.setFillColor(sf::Color::Yellow);
 
     window.draw(line);
-}
+}*/
 
 
 
@@ -185,8 +221,9 @@ int main()
     int selectedRow = 0;
     int selectedCol = 0;
     int selectedConnectionIndex = -1;
-    bool movingEnd = false; 
 
+    DragMode dragMode = DragMode::None;
+    
     std::vector<Slot> slots;
     std::vector<Connection> connections;
 
@@ -233,7 +270,9 @@ int main()
             else
             {
                 selectCircle(*event, selectedRow, selectedCol, connections,
-                    selectedConnectionIndex, movingEnd, rows, cols);
+                    selectedConnectionIndex, dragMode, rows, cols);
+                handleMouse(*event, selectedRow, selectedCol, connections,
+                    selectedConnectionIndex, dragMode, rows, cols, spacing);
             }
         }
 
