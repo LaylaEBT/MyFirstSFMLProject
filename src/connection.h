@@ -6,7 +6,7 @@ enum class DragMode { None, DraggingEnd, DraggingStart };
 class Connection
 {
 public:
-    Connection(sf::Vector2f start, sf::Vector2f end);
+    Connection(sf::Vector2f start, sf::Vector2f end, sf::Color color);
 
 
     sf::Vector2f getStart() const;
@@ -23,7 +23,7 @@ public:
 
     bool isSelected = false;
 
-    void draw(sf::RenderWindow& window, float thickness = 20.f);
+    void draw(sf::RenderWindow& window, float thickness = 40.f);
 
 
 
@@ -31,5 +31,6 @@ private:
 
     sf::Vector2f m_start;
     sf::Vector2f m_end;
+    sf::Color m_color;
 
 };

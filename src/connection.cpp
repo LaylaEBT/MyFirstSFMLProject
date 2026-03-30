@@ -1,8 +1,8 @@
 #include "connection.h"	
 #include <cmath>
 
-Connection::Connection(sf::Vector2f start, sf::Vector2f end)
-    : m_start(start), m_end(end)
+Connection::Connection(sf::Vector2f start, sf::Vector2f end, sf::Color color)
+    : m_start(start), m_end(end), m_color(color)
 {
 }
 
@@ -28,7 +28,7 @@ void Connection::setStart(sf::Vector2f start)
 
 void Connection::draw(sf::RenderWindow& window, float thickness)
 {
-    sf::Color color = isSelected ? sf::Color::Red : sf::Color::Yellow;
+    sf::Color color = isSelected ? sf::Color::Red : m_color;
 
 
     sf::Vector2f delta = m_end - m_start;

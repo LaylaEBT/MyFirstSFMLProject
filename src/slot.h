@@ -1,7 +1,9 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 
 class Slot {
 public:
+    Slot(sf::Color color);
 
     bool isSelected = false;
 
@@ -12,7 +14,10 @@ public:
 
     void draw(sf::RenderWindow& window);
 
+    void setColor(sf::Color color);
+
 private:
     sf::Vector2f m_position;
+    sf::Color m_color;
 
 };

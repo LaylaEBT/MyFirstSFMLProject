@@ -21,7 +21,7 @@ void drawcircle(sf::RenderWindow & window, float position_x, float position_y, s
 
 void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
     std::vector<Connection>& connections, int& selectedConnectionIndex,
-    DragMode& dragMode, int rows, int cols)
+    DragMode& dragMode, int rows, int cols, float spacing, float radius)
 {
     if (!event.is<sf::Event::KeyPressed>())
         return;
@@ -54,8 +54,8 @@ void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
     case sf::Keyboard::Scancode::Enter:
     {
         sf::Vector2f currentSlotCenter = {
-            selectedCol * 25.f + 10.f,
-            selectedRow * 25.f + 10.f
+            selectedCol * spacing + radius,
+            selectedRow * spacing + radius
         };
 
         if (dragMode == DragMode::None)
@@ -96,8 +96,8 @@ void selectCircle(const sf::Event& event, int& selectedRow, int& selectedCol,
     if (dragMode != DragMode::None && selectedConnectionIndex != -1)
     {
         sf::Vector2f newPos = {
-            selectedCol * 25.f + 10.f,
-            selectedRow * 25.f + 10.f
+            selectedCol * spacing + radius,
+            selectedRow * spacing + radius
         };
 
         if (dragMode == DragMode::DraggingEnd)
@@ -115,7 +115,7 @@ float distance(sf::Vector2f a, sf::Vector2f b)
 
 void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol,
     std::vector<Connection>& connections, int& selectedConnectionIndex,
-    DragMode& dragMode, int rows, int cols, float spacing)
+    DragMode& dragMode, int rows, int cols, float spacing, float radius)
 {
     if (event.is<sf::Event::MouseButtonPressed>())
     {
@@ -160,8 +160,8 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol,
             row = std::clamp(row, 0, rows - 1);
 
             sf::Vector2f snappedPos = {
-                col * spacing + 10.f,
-                row * spacing + 10.f
+                col * spacing + radius,
+                row * spacing + radius
             };
 
             if (dragMode == DragMode::DraggingEnd)
@@ -196,7 +196,7 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol,
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 400, 400 }), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode({ 600, 600 }), "Connecting dots");
 
     int selectedRow = 0;
     int selectedCol = 0;
@@ -209,18 +209,18 @@ int main()
 
 
 
-    const int rows = 16;
-    const int cols = 16;
-    const float spacing = 25.f;
+    const int rows = 10;
+    const int cols = 10;
+    const float spacing = 50.f;
 
-    const float radius = 10.f;
+    const float radius = 20.f;
     sf::Vector2f center_offset = { radius, radius };
 
     for (int row = 0; row < rows; ++row)
     {
         for (int col = 0; col < cols; ++col)
         {
-            Slot slot;
+            Slot slot(sf::Color::Cyan);
 
              
             slot.setPosition({ col * spacing, row * spacing });
@@ -230,12 +230,33 @@ int main()
 
            
         }
+
+       
+    }
+
+    for (int i = 95; i < 100; ++i)
+    {
+        slots[i].setColor(sf::Color::Blue);
+    }
+    
+
+    for (int i = 80; i < 88; ++i)
+    {
+        slots[i].setColor(sf::Color::Magenta);
+    }
+    
+    for (int i = 2; i < 10; ++i)
+    {
+        slots[i].setColor(sf::Color::Green);
     }
      
 
-    connections.emplace_back(slots[5].getPosition() + center_offset, slots[15].getPosition() + center_offset);
-    connections.emplace_back(slots[75].getPosition() + center_offset, slots[32].getPosition() + center_offset);
+    connections.emplace_back(slots[5].getPosition() + center_offset, slots[15].getPosition() + center_offset, sf::Color::Blue);
+    connections.emplace_back(slots[70].getPosition() + center_offset, slots[30].getPosition() + center_offset, sf::Color::Green);
+    connections.emplace_back(slots[2].getPosition() + center_offset, slots[12].getPosition() + center_offset, sf::Color::Magenta);
 
+    slots.erase(slots.begin() + 24, slots.begin() + 29);
+    slots.erase(slots.begin() + 41, slots.begin() + 48);
   
 
 
@@ -250,9 +271,9 @@ int main()
             else
             {
                 selectCircle(*event, selectedRow, selectedCol, connections,
-                    selectedConnectionIndex, dragMode, rows, cols);
+                    selectedConnectionIndex, dragMode, rows, cols, spacing, radius);
                 handleMouse(*event, selectedRow, selectedCol, connections,
-                    selectedConnectionIndex, dragMode, rows, cols, spacing);
+                    selectedConnectionIndex, dragMode, rows, cols, spacing, radius);
             }
         }
 
