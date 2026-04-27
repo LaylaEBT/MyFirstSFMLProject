@@ -18,7 +18,7 @@ target_sources(main
   PRIVATE
     src/main.cpp 
     src/slot.h "src/slot.cpp" 
-    src/connection.h "src/connection.cpp")
+    src/connection.h "src/connection.cpp" "src/DragMode.h")
 target_compile_features(main PRIVATE cxx_std_17)
 target_link_libraries(main PRIVATE SFML::Graphics)
 

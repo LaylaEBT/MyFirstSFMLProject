@@ -1,24 +1,13 @@
-#include "connection.h"	
+#include "connection.h"
 #include <cmath>
 
 Connection::Connection(sf::Vector2f start, sf::Vector2f end, sf::Color color)
-    : m_start(start), m_end(end), m_color(color)
+    : m_start(start)
+    , m_end(end)
+    , m_color(color)
 {
-}
-
-sf::Vector2f Connection::getStart() const
-{
-    return m_start;
-}
-
-sf::Vector2f Connection::getEnd() const
-{
-    return m_end;
-}
-
-void Connection::setEnd(sf::Vector2f end)
-{
-    m_end = end;
+    sf::Vector2f delta = end - start;
+    m_length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
 void Connection::setStart(sf::Vector2f start)
@@ -26,14 +15,28 @@ void Connection::setStart(sf::Vector2f start)
     m_start = start;
 }
 
-void Connection::draw(sf::RenderWindow& window, float thickness)
+void Connection::setEnd(sf::Vector2f end)
 {
-    sf::Color color = isSelected ? sf::Color::Red : m_color;
+    m_end = end;
+}
 
+void Connection::setSelected(bool selected)
+{
+    m_isSelected = selected;
+}
+
+sf::Vector2f Connection::getStart() const { return m_start; }
+sf::Vector2f Connection::getEnd()   const { return m_end; }
+sf::Color Connection::getColor() const { return m_color; }
+float Connection::getLength() const { return m_length; }
+bool Connection::isSelected() const { return m_isSelected; }
+
+void Connection::draw(sf::RenderWindow& window, float thickness) const
+{
+    sf::Color color = m_isSelected ? sf::Color::Red : m_color;
 
     sf::Vector2f delta = m_end - m_start;
     float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-
 
     sf::Vector2f perp(-delta.y / length, delta.x / length);
     sf::Vector2f offset = perp * (thickness / 2.f);
