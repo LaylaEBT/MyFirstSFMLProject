@@ -150,7 +150,7 @@ int getNearestSlotIndex(sf::Vector2f mousePos, const std::vector<Slot>& slots, f
     return nearest; 
 }
 
-void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol, std::vector<Slot>& slots,
+void handleMouse(const sf::Event& event, sf::RenderWindow& window, int& selectedRow, int& selectedCol, std::vector<Slot>& slots,
     std::vector<Connection>& connections, int& selectedConnectionIndex,
     DragMode& dragMode, int& hoveredSlotIndex,
     int rows, int cols, float spacing, float radius, float snapTolerance)
@@ -161,10 +161,12 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol, std
         if (mouse->button != sf::Mouse::Button::Left)
             return;
 
-        sf::Vector2f clickPos = {
+        sf::Vector2i rawPos = sf::Mouse::getPosition(window);
+        sf::Vector2f clickPos = window.mapPixelToCoords(rawPos);
+        /*sf::Vector2f clickPos = {
             (float)mouse->position.x,
             (float)mouse->position.y
-        };
+        };*/
 
         if (dragMode == DragMode::None)
         {
@@ -221,6 +223,8 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol, std
                 connections[selectedConnectionIndex].setEnd(snappedPos);
             else if (dragMode == DragMode::DraggingStart)
                 connections[selectedConnectionIndex].setStart(snappedPos);
+            
+
 
 
             selectedConnectionIndex = -1;
@@ -232,10 +236,14 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol, std
     if (event.is<sf::Event::MouseMoved>())
     {
         auto* mouse = event.getIf<sf::Event::MouseMoved>();
-        sf::Vector2f mousePos = {
+
+        sf::Vector2i rawPos = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePos = window.mapPixelToCoords(rawPos);
+
+        /*sf::Vector2f mousePos = {
             (float)mouse->position.x,
             (float)mouse->position.y
-        };
+        };*/
 
         hoveredSlotIndex = -1;
 
@@ -254,6 +262,10 @@ void handleMouse(const sf::Event& event, int& selectedRow, int& selectedCol, std
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 600, 600 }), "Connecting dots");
+
+    //window.setFramerateLimit(60);
+
+    sf::Clock clock;
 
     int selectedRow = 0;
     int selectedCol = 0;
@@ -306,29 +318,32 @@ int main()
         slots[i].setEmpty(true);
 
    
-    slots[35].setEmpty(true);
-    slots[45].setEmpty(true);
+    slots[36].setEmpty(true);
+    slots[46].setEmpty(true);
 
     connections.emplace_back(slots[5].getCenter(), slots[35].getCenter(), sf::Color::Blue);
-    connections.emplace_back(slots[79].getCenter(), slots[67].getCenter(), sf::Color::Green);
-    connections.emplace_back(slots[93].getCenter(), slots[97].getCenter(), sf::Color(255, 165, 0));
+    connections.emplace_back(slots[7].getCenter(), slots[29].getCenter(), sf::Color::Green);
+    connections.emplace_back(slots[59].getCenter(), slots[99].getCenter(), sf::Color(255, 165, 0));
     connections.emplace_back(slots[91].getCenter(), slots[94].getCenter(), sf::Color::Magenta);
   
 
 
    
-
     while (window.isOpen()) // boucle moteur
     {
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
+            else if (event->is<sf::Event::FocusGained>())
+            {
+                // pas de body nécessaire window refocus
+            }
             else
             {
                 selectCircle(*event, selectedRow, selectedCol, slots, connections,
                     selectedConnectionIndex, dragMode, k_rows, k_cols, k_spacing, k_radius, k_snapTolerance);
-                handleMouse(*event, selectedRow, selectedCol, slots, connections,
+                handleMouse(*event, window, selectedRow, selectedCol, slots, connections,
                     selectedConnectionIndex, dragMode, hoveredSlotIndex, k_rows, k_cols, k_spacing, k_radius, k_snapTolerance);
             }
         }
@@ -338,6 +353,19 @@ int main()
 
         int selectedIndex = selectedRow * k_cols + selectedCol;
 
+        float draggedLength = -1.f;
+        sf::Vector2f draggedOtherEnd;
+        bool isDragging = (dragMode != DragMode::None && selectedConnectionIndex != -1);
+
+        if (isDragging)
+        {
+            draggedLength = connections[selectedConnectionIndex].getLength();
+            if (dragMode == DragMode::DraggingEnd)
+                draggedOtherEnd = connections[selectedConnectionIndex].getStart();
+            else
+                draggedOtherEnd = connections[selectedConnectionIndex].getEnd();
+        }
+
 
         for (int i = 0; i < (int)slots.size(); ++i)
         {
@@ -345,12 +373,23 @@ int main()
             {
                 slots[i].setSelected(false);
                 slots[i].setHovered(false);
-                slots[i].draw(window); 
+                slots[i].setValidTarget(false);
+                slots[i].draw(window, clock); 
                 continue;
             }
             slots[i].setSelected((dragMode == DragMode::None) && (i == selectedIndex));
             slots[i].setHovered((i == hoveredSlotIndex));
-            slots[i].draw(window);
+
+            bool validTarget = false;
+            if (isDragging)
+            {
+                sf::Vector2f center = slots[i].getCenter();
+                float newLength = distance(center, draggedOtherEnd);
+                validTarget = std::abs(newLength - draggedLength) < k_snapTolerance;
+            }
+            slots[i].setValidTarget(validTarget);
+
+            slots[i].draw(window, clock);
         }
 
         for (int i = 0; i < (int)connections.size(); ++i)
@@ -409,12 +448,16 @@ int main()
             }
 
             window.display();
+            
 
-            sf::sleep(sf::seconds(10.f));
-            window.close();
+            //sf::sleep(sf::seconds(10.f));
+            //window.close();
         }
-             
-        window.display();
+        else
+        {
+            window.display();
+        }
+        
     }
     return 0;
 }

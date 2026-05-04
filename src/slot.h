@@ -11,6 +11,7 @@ public:
     void setSelected(bool selected);
     void setHovered(bool hovered);
     void setEmpty(bool empty);
+    void setValidTarget(bool valid);
 
     // getters
     sf::Vector2f getPosition() const;
@@ -19,8 +20,9 @@ public:
     bool isSelected() const;
     bool isHovered() const;
     bool isEmpty() const;
+    bool isValidTarget() const;
 
-    void draw(sf::RenderWindow& window) const;
+    void draw(sf::RenderWindow& window, const sf::Clock& clock) const;
 
 private:
     sf::Vector2f m_position;
@@ -30,4 +32,5 @@ private:
     bool m_isSelected = false;
     bool m_isEmpty = false;
     bool m_isHovered = false;
+    bool m_isValidTarget = false;
 };

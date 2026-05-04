@@ -33,7 +33,9 @@ bool Connection::isSelected() const { return m_isSelected; }
 
 void Connection::draw(sf::RenderWindow& window, float thickness) const
 {
-    sf::Color color = m_isSelected ? sf::Color::Red : m_color;
+
+
+    sf::Color color = m_color;
 
     sf::Vector2f delta = m_end - m_start;
     float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
