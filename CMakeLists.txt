@@ -18,9 +18,9 @@ target_sources(main
   PRIVATE
     src/main.cpp 
     src/slot.h "src/slot.cpp" 
-    src/connection.h "src/connection.cpp" "src/DragMode.h")
+    src/connection.h "src/connection.cpp" "src/DragMode.h" "src/GameState.h" "src/LevelSetup.h" "src/LevelSetup.cpp")
 target_compile_features(main PRIVATE cxx_std_17)
-target_link_libraries(main PRIVATE SFML::Graphics)
+target_link_libraries(main PRIVATE SFML::Graphics SFML::Audio)
 
 
 
