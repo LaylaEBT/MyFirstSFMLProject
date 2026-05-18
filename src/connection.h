@@ -13,7 +13,7 @@ public:
 
     // getters
     sf::Vector2f getStart() const;
-    sf::Vector2f getEnd()   const;
+    sf::Vector2f getEnd() const;
     sf::Color getColor() const;
     float getLength() const;
     bool isSelected() const;

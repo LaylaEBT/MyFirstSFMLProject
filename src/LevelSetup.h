@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include <vector>
 #include <slot.h>
 #include <connection.h>

@@ -26,7 +26,7 @@ void Connection::setSelected(bool selected)
 }
 
 sf::Vector2f Connection::getStart() const { return m_start; }
-sf::Vector2f Connection::getEnd()   const { return m_end; }
+sf::Vector2f Connection::getEnd() const { return m_end; }
 sf::Color Connection::getColor() const { return m_color; }
 float Connection::getLength() const { return m_length; }
 bool Connection::isSelected() const { return m_isSelected; }

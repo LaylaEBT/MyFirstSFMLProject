@@ -1,106 +1,125 @@
 ﻿
-# Wire Untangle — SFML Learning Project
+# Connecting Dots — A C++ / SFML Learning Project
 
-A 2D puzzle game built with **C++** and **SFML 3**, where the player must untangle a set of crossed wires by repositioning their endpoints on a grid.
+A 2D puzzle game built with **C++** and **SFML 3**, where the player must
+reposition wire endpoints on a grid until every wire lands on its matching
+coloured slot.
 
-This project is a personal learning exercise to get comfortable with **C++** and **SFML** coming from a **C# / Unity** background.
+This project is a personal learning exercise to get comfortable with C++ and
+SFML, coming from a C# / Unity background.
 
 ---
 
-## 🎮 Concept
+## 🎯 Concept
 
-The game is inspired by classic *wire connect* / *untangle* puzzle games. The screen displays a grid of slots connected by colored wires (the `Connection` objects). The wires are initially shuffled and cross each other. The player's goal is to move the wire endpoints around the grid until no wires are crossing.
+The screen shows a 10×10 grid of circular slots connected by thick coloured
+wires. The wires start in the wrong positions. The player must drag each wire
+endpoint onto the slot whose colour matches the wire, <qwithout stretching the
+wire beyond its original length. The game has three levels of increasing
+difficulty.
 
 ---
 
 ## 🕹️ Controls
 
-| Key | Action |
-|-----|--------|
+| Input | Action |
+|-------|--------|
 | `Z` / `↑` | Move cursor up |
 | `S` / `↓` | Move cursor down |
 | `Q` / `←` | Move cursor left |
 | `D` / `→` | Move cursor right |
-| `Enter` | Select a wire endpoint / confirm new position |
-
-**Two-step interaction:**
-- Press `Enter` on a slot that holds a wire endpoint to **select** it (the wire turns red).
-- Navigate to a new slot and press `Enter` again to **move** the endpoint there.
+| `Enter` | Pick up / drop a wire endpoint |
+| Left click near an endpoint | Pick up with mouse |
+| Left click on a slot | Drop endpoint |
+| Mouse move while dragging | Live wire preview |
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Project structure
 
 ```
 project/
 ├── src/
-│   ├── main.cpp          # Entry point, game loop, grid setup
-│   ├── slot.h            # Slot class declaration
-│   ├── slot.cpp          # Slot class implementation
-│   ├── connection.h      # Connection class declaration
-│   └── connection.cpp    # Connection class implementation
+│   ├── main.cpp            # Game loop, input handling, draw loop
+│   ├── slot.h / .cpp       # Slot class — grid node with colour and state
+│   ├── connection.h / .cpp # Connection class — wire between two points
+│   ├── DragMode.h          # Enum for drag state
+│   ├── GameState.h         # Enum for StartScreen / Playing / Won
+│   └── LevelSetup.h / .cpp # All level data — solution slots, barriers, starts
+├── assets/
+│   ├── font.ttf
+│   ├── start.png
+│   ├── win.png
+│   ├── drop.wav
+│   └── win.wav
 ├── CMakeLists.txt
 └── README.md
 ```
 
-### Key Classes
-
-**`Slot`** — represents a single node on the grid. It knows its position and whether it is currently selected by the cursor. It draws itself as a green circle (blue when selected).
-
-**`Connection`** — represents a wire between two slots. It stores a start and end point and draws itself as a thick yellow line (red when selected/being moved).
-
 ---
 
-## 🔧 Building the Project
+## 🔧 Building the project
 
 ### Requirements
 
 - [CMake](https://cmake.org/) 3.28 or higher
 - A C++17 compatible compiler (MSVC, GCC, or Clang)
-- An internet connection for the first build (SFML is fetched automatically)
+- An internet connection for the first build
 
 ### Steps
 
 ```bash
-# Clone the repository
 git clone <your-repo-url>
 cd <your-repo-folder>
-
-# Configure
 cmake -B build
-
-# Build
 cmake --build build
-
-# Run
 ./build/bin/main
 ```
 
-SFML 3.0.2 is automatically downloaded and compiled via CMake's `FetchContent` — no manual installation needed.
+On **Windows with Visual Studio 2022**, open the folder directly — Visual
+Studio detects `CMakeLists.txt` automatically. Select `x64-Release` and build
+with `Ctrl+Shift+B`.
+
+SFML 3.0.2 is downloaded automatically via CMake `FetchContent`.
+
+### Asset folder
+
+Place an `assets/` folder next to the executable.
+
+## 📚 C++ concepts explored
+
+- **Header / source file separation** and the scope resolution operator `::`
+- **Encapsulation** — private members, setters and getters, the `m_` naming convention
+- **References (`&`)** — pass-by-reference, modifying caller state from inside a function
+- **`const` correctness** — read-only method guarantees enforced by the compiler
+- **Member initializer lists** — initialising class members before the constructor body runs
+- **`std::vector`** — dynamic arrays, `push_back`, `emplace_back`, index management
+- **Scoped enums (`enum class`)** — type-safe state representation
+- **Lambdas** — inline anonymous functions with capture clauses
+- **Forward declarations** — resolving top-to-bottom ordering constraints
+- **`static` file-scoped helpers** — keeping implementation details local to a translation unit
+- **Named constants and the `k_` convention** — eliminating magic numbers
+- **Manual 2D vector math** — perpendicular vectors, normalisation, `TriangleStrip` rendering
+- **The game loop** — the explicit clear / update / draw cycle
+- **State machines** — driving game flow with `GameState` and `DragMode` enums
+- **SFML audio** — `SoundBuffer` and `Sound`, loading assets at startup
+- **SFML coordinate mapping** — `mapPixelToCoords` for correct multi-screen mouse input
 
 ---
 
-## 📚 What I Am Learning
+## ✅ Features implemented
 
-This project is my hands-on introduction to C++ after working in C# with Unity. Key concepts I am exploring:
-
-- **Header / source file separation** — declaring classes in `.h` files and implementing them in `.cpp` files
-- **References (`&`)** — passing objects by reference instead of by value, equivalent to how C# handles class instances automatically
-- **The scope operator (`::`)** — linking method implementations back to their class outside of the class body
-- **`const` correctness** — marking methods that don't modify the object
-- **`std::vector`** — C++'s equivalent of C#'s `List<T>`
-- **The game loop** — the clear / update / draw cycle that drives real-time applications in SFML
-- **Manual 2D math** — drawing thick lines using perpendicular vectors and triangle strips, something Unity's built-in renderer would normally handle automatically
-- And many more to follow!
-
----
-
-## 🗺️ Planned Features
-
-- [ ] Win condition — detect when no wires are crossing
-- [ ] Randomised wire layouts on startup
-- [ ] Visual feedback when two wires intersect
-- [ ] Multiple levels with increasing complexity
+- [x] Keyboard and mouse input with pick-up and drop
+- [x] Fixed-length wire constraint
+- [x] Colour-matched solution slots and win detection
+- [x] Valid drop target highlight — pulsing ring on reachable slots
+- [x] Hover preview while dragging
+- [x] Empty slot barriers for routing puzzles
+- [x] Sound feedback on drop and on win
+- [x] Start screen and win screen with buttons
+- [x] Three levels of increasing difficulty with automatic progression
+- [x] Full encapsulation refactor across all classes
+- [x] accessibility : Wong colour-blind safe palette used
 
 ---
 
@@ -108,4 +127,4 @@ This project is my hands-on introduction to C++ after working in C# with Unity. 
 
 | Library | Version | How it is included |
 |---------|---------|-------------------|
-| [SFML](https://www.sfml-dev.org/) | 3.0.2 | Auto-downloaded via CMake FetchContent |
+| [SFML](https://www.sfml-dev.org/) | 3.0.2 | CMake `FetchContent` |

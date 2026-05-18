@@ -283,13 +283,13 @@ bool checkWin(const std::vector<Connection>& connections,
     for (int i = 0; i < (int)connections.size(); ++i)
     {
         sf::Color c = connections[i].getColor();
-        bool      startOk = false;
-        bool      endOk = false;
+        bool startOk = false;
+        bool endOk = false;
 
         for (int j = 0; j < (int)slots.size(); ++j)
         {
-            if (slots[j].isEmpty())        continue;
-            if (slots[j].getColor() != c)  continue;
+            if (slots[j].isEmpty()) continue;
+            if (slots[j].getColor() != c) continue;
 
             if (distance(connections[i].getStart(), slots[j].getCenter()) < snapTolerance)
                 startOk = true;
@@ -355,7 +355,7 @@ int main()
     for (int row = 0; row < k_rows; ++row)
         for (int col = 0; col < k_cols; ++col)
         {
-            Slot slot(sf::Color::Cyan, k_radius);
+            Slot slot(sf::Color(80, 80, 80), k_radius);
             slot.setPosition({ col * k_spacing, row * k_spacing });
             slots.push_back(slot);
         }
